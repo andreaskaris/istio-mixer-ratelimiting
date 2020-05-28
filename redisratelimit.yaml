@@ -11,28 +11,23 @@ spec:
     quotas:
     - name: requestcountquota.instance.istio-system
       maxAmount: 200
-      validDuration: 2s
+      validDuration: 5s
       bucketDuration: 500ms
       rateLimitAlgorithm: ROLLING_WINDOW
       # The first matching override is applied.
       # A requestcount instance is checked against override dimensions.
-      # overrides:
-      # # ### # The following override applies to 'reviews' regardless
-      # # ### # of the source.
-      # - dimensions:
-      #     destination: reviews-v1
-      #   maxAmount: 1
-      ### # The following override applies to 'productpage' when
-      ### # the source is a specific ip address.
-      ### - dimensions:
-      ###     destination: productpage
-      ###     source: "10.28.11.20"
-      ###   maxAmount: 2
-      ### # The following override applies to 'productpage' regardless
-      ### # of the source.
-      ### - dimensions:
-      ###     destination: productpage
-      ###   maxAmount: 2
+      overrides:
+      # ### # The following override applies to 'reviews' regardless
+      # ### # of the source.
+      - dimensions:
+          destination: nginx-deployment-a
+        maxAmount: 10
+      - dimensions:
+          destination: nginx-deployment-b
+        maxAmount: 10
+      - dimensions:
+          destination: nginx-deployment-c
+        maxAmount: 10
 ---
 apiVersion: config.istio.io/v1alpha2
 kind: instance
@@ -43,7 +38,7 @@ spec:
   compiledTemplate: quota
   params:
     dimensions:
-      destination: destination.workload.name | "unknown"
+      destination: destination.service.name | "unknown"
       # source: request.headers["x-forwarded-for"] | "unknown"
       # destination: destination.labels["app"] | destination.workload.name | "unknown"
       # destinationVersion: destination.labels["version"] | "unknown"
